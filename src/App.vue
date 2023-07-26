@@ -97,13 +97,13 @@ const resetStore = () => {
   </form>
   <div
     v-if="loading"
-    class="absolute left-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-gray-300/70 dark:bg-gray-700/70"
+    class="absolute left-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-zinc-300/70 dark:bg-zinc-700/70"
   >
     <svg-icon
       type="mdi"
       :path="mdiLoading"
       size="100"
-      class="animate-spin text-gray-600 dark:text-gray-200"
+      class="animate-spin text-zinc-600 dark:text-zinc-200"
     ></svg-icon>
   </div>
 </template>

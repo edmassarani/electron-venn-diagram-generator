@@ -26,7 +26,7 @@ const addSource = () => {
       Add your data source files here, only CSV files are allowed
     </p>
 
-    <div class="mb-4 overflow-auto bg-gray-200 p-4 dark:bg-gray-700">
+    <div class="mb-4 overflow-auto bg-zinc-200 p-4 dark:bg-zinc-700">
       <DataSourceInput
         v-for="i in sourceCount"
         :key="i"

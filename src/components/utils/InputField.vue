@@ -43,7 +43,7 @@ defineEmits(['update:modelValue'])
     <input
       :value="modelValue"
       :type="type"
-      class="w-full rounded border border-gray-600 p-1 dark:border-gray-400"
+      class="w-full rounded border border-zinc-600 p-1 dark:border-zinc-400"
       :tabindex="tabindex"
       v-bind="$attrs"
       @input="

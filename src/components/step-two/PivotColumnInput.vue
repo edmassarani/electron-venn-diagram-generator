@@ -26,7 +26,7 @@ const pivotColumn = computed<string | undefined>({
 </script>
 
 <template>
-  <div class="relative rounded bg-white p-2 dark:bg-gray-600">
+  <div class="relative rounded bg-white p-2 dark:bg-zinc-600">
     <h4 class="mb-2 text-xl font-bold">Source: {{ name }}</h4>
 
     <div class="pl-2">

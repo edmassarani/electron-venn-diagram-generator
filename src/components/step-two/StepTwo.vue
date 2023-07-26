@@ -23,7 +23,7 @@ const getFolderPath = async () => {
       intersections
     </p>
 
-    <div class="mb-4 overflow-auto bg-gray-200 p-4 dark:bg-gray-700">
+    <div class="mb-4 overflow-auto bg-zinc-200 p-4 dark:bg-zinc-700">
       <PivotColumnInput
         v-for="i in sourceCount"
         :key="i"
@@ -31,14 +31,14 @@ const getFolderPath = async () => {
         class="mb-4"
       />
 
-      <div class="relative rounded bg-white p-2 dark:bg-gray-600">
+      <div class="relative rounded bg-white p-2 dark:bg-zinc-600">
         <h4 class="mb-2 text-xl font-bold">Save Files To</h4>
 
         <div class="flex items-center">
           <div class="relative mr-2 mt-2">
             <input
               type="button"
-              class="cursor-pointer rounded border border-gray-500 p-1 dark:border-gray-400"
+              class="cursor-pointer rounded border border-zinc-500 p-1 dark:border-zinc-400"
               value="Select destination folder"
               :tabindex="1"
               required

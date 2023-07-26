@@ -41,7 +41,7 @@ const removeSource = () => {
 </script>
 
 <template>
-  <div class="relative rounded bg-white p-2 dark:bg-gray-600">
+  <div class="relative rounded bg-white p-2 dark:bg-zinc-600">
     <h4 class="mb-2 text-xl font-bold">Data Source {{ index + 1 }}</h4>
 
     <div class="pl-2">
@@ -55,7 +55,13 @@ const removeSource = () => {
       />
       <div class="flex items-center">
         <div class="relative mr-2 mt-2">
-          <input type="file" name="file" required @change="getFilePath" />
+          <input
+            type="file"
+            name="file"
+            class="cursor-pointer"
+            required
+            @change="getFilePath"
+          />
         </div>
         <p>{{ file }}</p>
       </div>
