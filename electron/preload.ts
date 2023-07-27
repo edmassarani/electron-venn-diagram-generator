@@ -82,8 +82,6 @@ function useLoading() {
   }
 }
 
-// ----------------------------------------------------------------------
-
 const { appendLoading, removeLoading } = useLoading()
 domReady().then(appendLoading)
 
@@ -104,6 +102,11 @@ function invoke<P extends unknown[], R>(channel: string, ...args: P) {
 const electronAPI = {
   openFile: () => invoke<[], string | undefined>('dialog:openFile'),
   openDirectory: () => invoke<[], string | undefined>('dialog:openDirectory'),
+  getColumnsFromCsvFiles: (sources: Source[]) =>
+    invoke<[Source[]], { error?: Error; result?: Source[] }>(
+      'csv:getColumnsFromFiles',
+      sources
+    ),
 }
 
 contextBridge.exposeInMainWorld('electron', electronAPI)

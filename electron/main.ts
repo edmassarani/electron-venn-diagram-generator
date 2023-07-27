@@ -6,6 +6,8 @@ import {
   IpcMainInvokeEvent,
 } from 'electron'
 import path from 'node:path'
+import { parse } from 'csv-parse'
+import fs from 'fs'
 
 // The built directory structure
 //
@@ -44,6 +46,34 @@ async function openFile() {
   }
 }
 
+async function getColumnsFromCsvFiles(
+  _ev: IpcMainInvokeEvent,
+  sources: Source[]
+) {
+  try {
+    for (const source of sources) {
+      const records = []
+      const parser = fs.createReadStream(source.file).pipe(
+        parse({
+          to_line: 1,
+          delimiter: [',', ';', '\t'],
+          trim: true,
+          relax_quotes: true,
+        })
+      )
+      for await (const record of parser) {
+        records.push(record)
+      }
+
+      source.columns = records[0]
+    }
+  } catch (error) {
+    return { error }
+  }
+
+  return { result: sources }
+}
+
 // async function generateOutput() {
 //   const { canceled, filePaths } = await dialog.showOpenDialog({
 //     properties: ['openDirectory'],
@@ -63,6 +93,7 @@ function createWindow() {
 
   ipcMain.handle('dialog:openDirectory', openDirectory)
   ipcMain.handle('dialog:openFile', openFile)
+  ipcMain.handle('csv:getColumnsFromFiles', getColumnsFromCsvFiles)
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)

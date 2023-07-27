@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { toRaw } from 'vue'
 import { mdiCheckCircleOutline, mdiLoading } from '@mdi/js'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -11,25 +12,25 @@ import TextButton from '@utils/TextButton.vue'
 
 const store = useSourceStore()
 
-const { step, loading } = storeToRefs(store)
-// const { step, sources, destinationPath, loading } = storeToRefs(store)
+const { step, sources, destinationPath, loading } = storeToRefs(store)
 
 const proceed = async () => {
   loading.value = true
   // trigger functions on step increase (starts at 0)
   switch (step.value) {
     case 0: {
-      // const res = await eel.parse_csv_files(sources.value)()
+      const res = await window.electron.getColumnsFromCsvFiles(
+        toRaw(sources.value)
+      )
 
-      // if (!res.result) {
-      //   alert(res.error)
-      //   loading.value = false
-      //   return
-      // } else {
-      //   sources.value.forEach((source) => {
-      //     source.columns = res.data[source.name].columns
-      //   })
-      // }
+      if (!res.result) {
+        alert(res.error)
+        loading.value = false
+        return
+      } else {
+        console.log(res.result)
+        store.setSources(res.result)
+      }
 
       break
     }
