@@ -31,8 +31,9 @@ const name = computed({
 
 const file = computed(() => store.sources[props.index].file)
 
-const getFilePath = (e: any) => {
-  store.setSourceFile(props.index, e.target.files[0].path)
+const getFilePath = async () => {
+  const path = await window.electron.openFile()
+  if (path) store.setSourceFile(props.index, path)
 }
 
 const removeSource = () => {
@@ -48,19 +49,30 @@ const removeSource = () => {
       <InputField
         v-model="name"
         label="Source Name"
-        class="mb-1"
+        class="mb-2"
         placeholder="Enter a name for this source"
         :tabindex="1"
         required
       />
+
       <div class="flex items-center">
-        <div class="relative mr-2 mt-2">
+        <div class="relative mr-2">
           <input
-            type="file"
-            name="file"
-            class="cursor-pointer"
+            type="button"
+            class="cursor-pointer rounded border border-zinc-500 p-1 dark:border-zinc-400"
+            value="Select file"
+            :tabindex="1"
             required
-            @change="getFilePath"
+            @click="getFilePath"
+          />
+          <input
+            type="text"
+            name="file"
+            :value="file"
+            required
+            class="absolute inset-x-1/2 bottom-0 h-px w-px opacity-0"
+            tabindex="-1"
+            @keypress.prevent="false"
           />
         </div>
         <p>{{ file }}</p>

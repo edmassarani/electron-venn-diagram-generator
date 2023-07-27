@@ -93,10 +93,17 @@ window.onmessage = (ev) => {
 
 setTimeout(removeLoading, 4999)
 
+// ----------------------------------------------------------------------
+
 import { contextBridge, ipcRenderer } from 'electron'
 
+function invoke<P extends unknown[], R>(channel: string, ...args: P) {
+  return ipcRenderer.invoke(channel, ...args) as Promise<R>
+}
+
 const electronAPI = {
-  openDirectory: () => ipcRenderer.invoke('dialog:openDirectory'),
+  openFile: () => invoke<[], string | undefined>('dialog:openFile'),
+  openDirectory: () => invoke<[], string | undefined>('dialog:openDirectory'),
 }
 
 contextBridge.exposeInMainWorld('electron', electronAPI)

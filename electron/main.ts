@@ -1,4 +1,10 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  IpcMainInvokeEvent,
+} from 'electron'
 import path from 'node:path'
 
 // The built directory structure
@@ -28,14 +34,15 @@ async function openDirectory() {
   }
 }
 
-// async function getHeadersFromCsvFiles() {
-//   const { canceled, filePaths } = await dialog.showOpenDialog({
-//     properties: ['openDirectory'],
-//   })
-//   if (!canceled) {
-//     return filePaths[0]
-//   }
-// }
+async function openFile() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'CSV File', extensions: ['csv'] }],
+  })
+  if (!canceled) {
+    return filePaths[0]
+  }
+}
 
 // async function generateOutput() {
 //   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -55,6 +62,7 @@ function createWindow() {
   })
 
   ipcMain.handle('dialog:openDirectory', openDirectory)
+  ipcMain.handle('dialog:openFile', openFile)
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)

@@ -10,7 +10,7 @@ const { sourceCount, destinationPath } = storeToRefs(store)
 
 const getFolderPath = async () => {
   const path = await window.electron.openDirectory()
-  store.setDestinationPath(path)
+  if (path) store.setDestinationPath(path)
 }
 </script>
 

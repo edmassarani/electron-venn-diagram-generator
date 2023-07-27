@@ -1,21 +1,5 @@
 import { defineStore } from 'pinia'
 
-type Source = {
-  name: string
-  file: string
-  pivot?: string
-  columns?: string[]
-}
-
-type State = {
-  sources: Source[]
-  destinationPath: string
-  minCount: number
-  maxCount: number
-  step: number
-  loading: boolean
-}
-
 export const useSourceStore = defineStore('sources', {
   state: (): State => ({
     sources: [
@@ -60,6 +44,10 @@ export const useSourceStore = defineStore('sources', {
       }
 
       return false
+    },
+
+    setSources(sources: Source[]) {
+      this.sources = sources
     },
 
     setSourceName(index: number, name: string) {

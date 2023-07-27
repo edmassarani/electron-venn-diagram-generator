@@ -30,6 +30,7 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/components/utils'),
       '@components': path.resolve(__dirname, './src/components'),
       '@assets': path.resolve(__dirname, './src/assets'),
+      '@types': path.resolve(__dirname, './src/@types'),
     },
   },
 })
