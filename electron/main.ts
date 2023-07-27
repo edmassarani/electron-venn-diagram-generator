@@ -65,6 +65,7 @@ async function getColumnsFromCsvFiles(
           relax_quotes: true,
         })
       )
+
       for await (const record of parser) {
         records.push(record)
       }
@@ -84,18 +85,19 @@ async function generateOutput(
   destinationPath: string
 ) {
   const date = new Date()
-  const dateString = `${date.getFullYear()}${
-    date.getMonth() + 1
-  }${date.getDate()}`
+  const dateString = `${date.getFullYear()}${(
+    '0' +
+    (date.getMonth() + 1)
+  ).slice(-2)}${('0' + date.getDate()).slice(-2)}`
 
-  const allSourcesPivots = new Map<string, string[]>()
+  const allSourcesPivots = new Set<string>()
 
   const workbook = XLSX.utils.book_new()
 
   try {
     for (const source of sources) {
       source.pivotValues = new Set<string>()
-      const records: any[] = []
+      const records: { [x: string]: string }[] = []
       const parser = fs
         .createReadStream(source.file)
         .pipe(
@@ -111,16 +113,9 @@ async function generateOutput(
 
           if (source.pivot) {
             const pivotValue = (row[source.pivot] as string).toLowerCase()
+
             source.pivotValues?.add(pivotValue)
-            if (allSourcesPivots.has(pivotValue)) {
-              allSourcesPivots.set(pivotValue, [
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                ...allSourcesPivots.get(pivotValue)!,
-                source.name,
-              ])
-            } else {
-              allSourcesPivots.set(pivotValue, [source.name])
-            }
+            allSourcesPivots.add(pivotValue)
           }
         })
 
@@ -130,6 +125,28 @@ async function generateOutput(
 
       XLSX.utils.book_append_sheet(workbook, worksheet, source.name)
     }
+
+    const sourceComparisonSheetData: { [x: string]: string | boolean }[] = []
+
+    for (const pivot of allSourcesPivots) {
+      const obj: { [x: string]: string | boolean } = {
+        pivot,
+      }
+      for (const source of sources) {
+        if (source.pivotValues?.has(pivot)) {
+          obj[source.name] = true
+        } else {
+          obj[source.name] = false
+        }
+      }
+      sourceComparisonSheetData.push(obj)
+    }
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(sourceComparisonSheetData),
+      'Venn Diagram Data'
+    )
 
     XLSX.writeFile(
       workbook,
