@@ -1,30 +1,22 @@
-/**
- * @see https://www.electron.build/configuration/configuration
- */
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "venn.signify",
+  "productName": "Venn Diagram Generator",
+  "icon": "dist/electron-vite.ico",
   "asar": true,
   "directories": {
     "output": "release/${version}"
   },
-  "files": [
-    "dist-electron",
-    "dist"
-  ],
+  "files": ["dist-electron", "dist"],
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",
-    "target": [
-      "dmg"
-    ]
+    "target": ["dmg"]
   },
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": [
-          "x64"
-        ]
+        "arch": ["x64"]
       }
     ],
     "artifactName": "${productName}_${version}.${ext}"

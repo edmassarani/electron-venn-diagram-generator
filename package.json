@@ -1,5 +1,6 @@
 {
   "name": "venn-diagram-generator",
+  "description": "A simple application to generate Venn diagrams",
   "private": true,
   "version": "1.0.0",
   "scripts": {
