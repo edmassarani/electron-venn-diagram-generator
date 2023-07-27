@@ -8,6 +8,7 @@ import {
 import path from 'node:path'
 import { parse } from 'csv-parse'
 import fs from 'fs'
+import { once } from 'node:events'
 
 // The built directory structure
 //
@@ -74,17 +75,43 @@ async function getColumnsFromCsvFiles(
   return { result: sources }
 }
 
-// async function generateOutput() {
-//   const { canceled, filePaths } = await dialog.showOpenDialog({
-//     properties: ['openDirectory'],
-//   })
-//   if (!canceled) {
-//     return filePaths[0]
-//   }
-// }
+async function generateOutput(_ev: IpcMainInvokeEvent, sources: Source[]) {
+  const date = new Date()
+  const dateString = `${date.getFullYear}${
+    date.getMonth() + 1
+  }${date.getDate()}`
+
+  try {
+    for (const source of sources) {
+      source.pivotValues = new Set<string>()
+      const records = []
+      const parser = fs
+        .createReadStream(source.file)
+        .pipe(
+          parse({
+            columns: true,
+            delimiter: [',', ';', '\t'],
+            trim: true,
+            relax_quotes: true,
+          })
+        )
+        .on('data', (row) => {
+          if (source.pivot) source.pivotValues?.add(row[source.pivot])
+        })
+
+      await once(parser, 'finish')
+    }
+  } catch (error) {
+    return { error, result: false }
+  }
+
+  return { result: true }
+}
 
 function createWindow() {
   win = new BrowserWindow({
+    width: 1000,
+    height: 800,
     icon: path.join(process.env.PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -94,11 +121,11 @@ function createWindow() {
   ipcMain.handle('dialog:openDirectory', openDirectory)
   ipcMain.handle('dialog:openFile', openFile)
   ipcMain.handle('csv:getColumnsFromFiles', getColumnsFromCsvFiles)
+  ipcMain.handle('csv:generateOutput', generateOutput)
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
 }

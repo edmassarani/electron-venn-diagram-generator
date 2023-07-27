@@ -8,8 +8,9 @@ declare global {
   type Source = {
     name: string
     file: string
-    pivot?: string
     columns?: string[]
+    pivot?: string
+    pivotValues?: Set<string>
   }
 
   type State = {

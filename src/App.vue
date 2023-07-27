@@ -36,16 +36,16 @@ const proceed = async () => {
     }
 
     case 1: {
-      // const res = await eel.generate_diagram(
-      //   sources.value,
-      //   destinationPath.value
-      // )()
+      const res = await window.electron.generateOutput(
+        toRaw(sources.value),
+        toRaw(destinationPath.value)
+      )
 
-      // if (!res.result) {
-      //   alert(res.error)
-      //   loading.value = false
-      //   return
-      // }
+      if (!res.result) {
+        alert(res.error)
+        loading.value = false
+        return
+      }
 
       break
     }

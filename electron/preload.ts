@@ -107,6 +107,12 @@ const electronAPI = {
       'csv:getColumnsFromFiles',
       sources
     ),
+  generateOutput: (sources: Source[], destinationPath: string) =>
+    invoke<[Source[], string], { error?: Error; result: boolean }>(
+      'csv:generateOutput',
+      sources,
+      destinationPath
+    ),
 }
 
 contextBridge.exposeInMainWorld('electron', electronAPI)
