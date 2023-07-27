@@ -8,7 +8,7 @@ export const useSourceStore = defineStore('sources', {
     ],
     destinationPath: '',
     minCount: 2,
-    maxCount: 6,
+    maxCount: 3,
     step: 0,
     loading: false,
   }),

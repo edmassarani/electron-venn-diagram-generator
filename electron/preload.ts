@@ -1,3 +1,31 @@
+import { contextBridge, ipcRenderer } from 'electron'
+
+function invoke<P extends unknown[], R>(channel: string, ...args: P) {
+  return ipcRenderer.invoke(channel, ...args) as Promise<R>
+}
+
+const electronAPI = {
+  openFile: () => invoke<[], string | undefined>('dialog:openFile'),
+  openDirectory: () => invoke<[], string | undefined>('dialog:openDirectory'),
+  getColumnsFromCsvFiles: (sources: Source[]) =>
+    invoke<[Source[]], { error?: Error; result?: Source[] }>(
+      'csv:getColumnsFromFiles',
+      sources
+    ),
+  generateOutput: (sources: Source[], destinationPath: string) =>
+    invoke<[Source[], string], { error?: Error; result: boolean }>(
+      'csv:generateOutput',
+      sources,
+      destinationPath
+    ),
+}
+
+contextBridge.exposeInMainWorld('electron', electronAPI)
+
+export type ElectronAPI = typeof electronAPI
+
+// -------------------- DO NOT CHANGE BELOW THIS LINE --------------------
+
 function domReady(
   condition: DocumentReadyState[] = ['complete', 'interactive']
 ) {
@@ -90,31 +118,3 @@ window.onmessage = (ev) => {
 }
 
 setTimeout(removeLoading, 4999)
-
-// ----------------------------------------------------------------------
-
-import { contextBridge, ipcRenderer } from 'electron'
-
-function invoke<P extends unknown[], R>(channel: string, ...args: P) {
-  return ipcRenderer.invoke(channel, ...args) as Promise<R>
-}
-
-const electronAPI = {
-  openFile: () => invoke<[], string | undefined>('dialog:openFile'),
-  openDirectory: () => invoke<[], string | undefined>('dialog:openDirectory'),
-  getColumnsFromCsvFiles: (sources: Source[]) =>
-    invoke<[Source[]], { error?: Error; result?: Source[] }>(
-      'csv:getColumnsFromFiles',
-      sources
-    ),
-  generateOutput: (sources: Source[], destinationPath: string) =>
-    invoke<[Source[], string], { error?: Error; result: boolean }>(
-      'csv:generateOutput',
-      sources,
-      destinationPath
-    ),
-}
-
-contextBridge.exposeInMainWorld('electron', electronAPI)
-
-export type ElectronAPI = typeof electronAPI

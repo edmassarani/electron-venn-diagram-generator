@@ -6,9 +6,12 @@ import {
   IpcMainInvokeEvent,
 } from 'electron'
 import path from 'node:path'
-import { parse } from 'csv-parse'
-import fs from 'fs'
 import { once } from 'node:events'
+import { parse } from 'csv-parse'
+import * as fs from 'fs'
+import * as XLSX from 'xlsx'
+
+XLSX.set_fs(fs)
 
 // The built directory structure
 //
@@ -75,16 +78,24 @@ async function getColumnsFromCsvFiles(
   return { result: sources }
 }
 
-async function generateOutput(_ev: IpcMainInvokeEvent, sources: Source[]) {
+async function generateOutput(
+  _ev: IpcMainInvokeEvent,
+  sources: Source[],
+  destinationPath: string
+) {
   const date = new Date()
-  const dateString = `${date.getFullYear}${
+  const dateString = `${date.getFullYear()}${
     date.getMonth() + 1
   }${date.getDate()}`
+
+  const allSourcesPivots = new Map<string, string[]>()
+
+  const workbook = XLSX.utils.book_new()
 
   try {
     for (const source of sources) {
       source.pivotValues = new Set<string>()
-      const records = []
+      const records: any[] = []
       const parser = fs
         .createReadStream(source.file)
         .pipe(
@@ -96,12 +107,36 @@ async function generateOutput(_ev: IpcMainInvokeEvent, sources: Source[]) {
           })
         )
         .on('data', (row) => {
-          if (source.pivot) source.pivotValues?.add(row[source.pivot])
+          records.push(row)
+
+          if (source.pivot) {
+            const pivotValue = (row[source.pivot] as string).toLowerCase()
+            source.pivotValues?.add(pivotValue)
+            if (allSourcesPivots.has(pivotValue)) {
+              allSourcesPivots.set(pivotValue, [
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                ...allSourcesPivots.get(pivotValue)!,
+                source.name,
+              ])
+            } else {
+              allSourcesPivots.set(pivotValue, [source.name])
+            }
+          }
         })
 
       await once(parser, 'finish')
+
+      const worksheet = XLSX.utils.json_to_sheet(records)
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, source.name)
     }
+
+    XLSX.writeFile(
+      workbook,
+      path.join(destinationPath, `venn_diagram_${dateString}.xlsx`)
+    )
   } catch (error) {
+    console.error(error)
     return { error, result: false }
   }
 
