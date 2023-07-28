@@ -4,6 +4,7 @@ import { once } from 'node:events'
 import { parse } from 'csv-parse'
 import * as fs from 'fs'
 import * as XLSX from 'xlsx'
+import { detect } from 'csv-string'
 
 export async function getColumnsFromCsvFiles(
   _ev: IpcMainInvokeEvent,
@@ -11,11 +12,13 @@ export async function getColumnsFromCsvFiles(
 ) {
   try {
     for (const source of sources) {
+      const delimiter = await detectDelimiter(source.file)
+
       const records = []
       const parser = fs.createReadStream(source.file).pipe(
         parse({
           to_line: 1,
-          delimiter: [',', ';', '\t'],
+          delimiter,
           trim: true,
           relax_quotes: true,
         })
@@ -34,34 +37,6 @@ export async function getColumnsFromCsvFiles(
   return { result: sources }
 }
 
-function getDateString() {
-  const date = new Date()
-
-  return `${date.getFullYear()}${('0' + (date.getMonth() + 1)).slice(-2)}${(
-    '0' + date.getDate()
-  ).slice(-2)}`
-}
-
-function getComparisonData(sources: Source[], allSourcesPivots: Set<string>) {
-  const comparisonData: { [x: string]: string | boolean }[] = []
-
-  for (const pivot of allSourcesPivots) {
-    const obj: { [x: string]: string | boolean } = {
-      pivot,
-    }
-    for (const source of sources) {
-      if (source.pivotValues?.has(pivot)) {
-        obj[source.name] = true
-      } else {
-        obj[source.name] = false
-      }
-    }
-    comparisonData.push(obj)
-  }
-
-  return comparisonData
-}
-
 export async function generateOutput(
   _ev: IpcMainInvokeEvent,
   sources: Source[],
@@ -77,6 +52,8 @@ export async function generateOutput(
 
   try {
     for (const source of sources) {
+      const delimiter = await detectDelimiter(source.file)
+
       source.pivotValues = new Set<string>()
 
       const records: { [x: string]: string }[] = []
@@ -86,7 +63,7 @@ export async function generateOutput(
         .pipe(
           parse({
             columns: true,
-            delimiter: [',', ';', '\t'],
+            delimiter,
             trim: true,
             relax_quotes: true,
           })
@@ -129,4 +106,50 @@ export async function generateOutput(
   }
 
   return { result: true }
+}
+
+async function detectDelimiter(path: string) {
+  const stream = fs.createReadStream(path)
+
+  let delimiter = ','
+
+  stream.on('data', (chunk) => {
+    const sample = chunk.toString()
+
+    delimiter = detect(sample)
+
+    stream.destroy()
+  })
+
+  await once(stream, 'close')
+
+  return delimiter
+}
+
+function getDateString() {
+  const date = new Date()
+
+  return `${date.getFullYear()}${('0' + (date.getMonth() + 1)).slice(-2)}${(
+    '0' + date.getDate()
+  ).slice(-2)}`
+}
+
+function getComparisonData(sources: Source[], allSourcesPivots: Set<string>) {
+  const comparisonData: { [x: string]: string | boolean }[] = []
+
+  for (const pivot of allSourcesPivots) {
+    const obj: { [x: string]: string | boolean } = {
+      pivot,
+    }
+    for (const source of sources) {
+      if (source.pivotValues?.has(pivot)) {
+        obj[source.name] = true
+      } else {
+        obj[source.name] = false
+      }
+    }
+    comparisonData.push(obj)
+  }
+
+  return comparisonData
 }
